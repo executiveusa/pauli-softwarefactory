@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type Ref } from 'react';
+import { remote, officeLocation, setOfficeImage, openOfficeBlob } from '../transport';
 import { api } from '../api';
 import { qaKey, useStore } from '../store';
 import { PREVIEW_ENV_MAX_CHARS, previewEnvChars, previewEnvTooBig } from '../../../shared/previewEnv';
@@ -376,8 +377,8 @@ function QaPanel({ repo, pull, qa }: { repo: RepoView; pull: PullInfo; qa?: QaVi
               {shots.map((s, i) => {
                 const url = qaShotUrl(repo.id, pull.number, i, qa.updatedAt);
                 return (
-                  <a key={i} className="qa-shot" href={url} target="_blank" rel="noreferrer" title={s.page ?? s.caption}>
-                    <img src={url} alt={s.caption} loading="lazy" />
+                  <a key={i} className="qa-shot" href={url} target="_blank" rel="noreferrer" title={s.page ?? s.caption} onClick={remote ? (e) => { e.preventDefault(); void openOfficeBlob(url); } : undefined}>
+                    <img ref={remote ? (el) => { if (el && el.dataset.src !== url) { el.dataset.src = url; setOfficeImage(el, url); } } : undefined} src={remote ? undefined : url} alt={s.caption} loading="lazy" />
                     <span className="small">{s.caption}</span>
                   </a>
                 );
@@ -475,7 +476,7 @@ function CompareView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sync]);
 
-  const src = (p: PreviewView, side: Side) => (p.url ? atPath(reachable((sync && proxy[side]) || p.url, location), path) : null);
+  const src = (p: PreviewView, side: Side) => (p.url ? atPath(reachable((sync && proxy[side]) || p.url, officeLocation), path) : null);
   const label = (p: PreviewView, side: Side) => (
     <div className="compare-label">
       <b>{side === 'main' ? repo.defaultBranch : p.ref}</b>
@@ -670,7 +671,7 @@ export function AppViewer({ repoId, pr }: { repoId: string; pr?: number | null }
             </button>
           )}
           {current.url ? (
-            <a className="btn btn-small" href={reachable(current.url, location)} target="_blank" rel="noreferrer">
+            <a className="btn btn-small" href={reachable(current.url, officeLocation)} target="_blank" rel="noreferrer">
               Open in new tab ↗
             </a>
           ) : (
@@ -686,7 +687,7 @@ export function AppViewer({ repoId, pr }: { repoId: string; pr?: number | null }
           {comparing ? (
             <CompareView repo={repo} main={main} pr={prView} width={width} reloads={reloads} busy={busy} onStartMain={() => void startMain()} onStartPr={() => void startPr()} />
           ) : (
-            <PreviewStage repo={repo} preview={current} label={label} src={current.url && reachable(current.url, location)} width={width} reloads={reloads} busy={busy} onStart={() => void (channel == null ? startMain() : startPr())} />
+            <PreviewStage repo={repo} preview={current} label={label} src={current.url && reachable(current.url, officeLocation)} width={width} reloads={reloads} busy={busy} onStart={() => void (channel == null ? startMain() : startPr())} />
           )}
         </div>
         {prView && showQa && pull && <QaPanel repo={repo} pull={pull} qa={qaRecords[qaKey(repo.id, pull.number)]} />}

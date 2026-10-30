@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { wsUrl, wsProtocols } from '../transport';
 import { Terminal, type ITheme } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { WebLinksAddon } from '@xterm/addon-web-links';
@@ -74,8 +75,7 @@ export function LiveTerminal({ agentId, className }: { agentId: string; classNam
       if (ready) send({ t: 'resize', cols: term.cols, rows: term.rows });
     };
     const connect = () => {
-      const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-      const socket = new WebSocket(`${proto}://${location.host}/ws/term?agent=${encodeURIComponent(agentId)}`);
+      const socket = new WebSocket(wsUrl(`/ws/term?agent=${encodeURIComponent(agentId)}`), wsProtocols());
       ws = socket;
       socket.onopen = () => setConnected(true);
       socket.onmessage = (e) => {

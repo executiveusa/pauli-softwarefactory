@@ -5,6 +5,7 @@
 // the CEO off on their walks. Everything it moved is put back when the floor goes.
 
 import { CEO_ID, type AgentStatus, type RepoView } from '../../../shared/types';
+import { officeFetch } from '../transport';
 import { dayPart, standupLine } from '../../../shared/speech';
 import { kanbanFor, useStore, type Agent } from '../store';
 import { ding, noise } from '../ui/sfx';
@@ -119,7 +120,7 @@ function sayStandupLine(count: number, hour: number, done: (how: string) => void
     return;
   }
   if (!voiceKeySet) return done('no key');
-  fetch(`/api/voice/standup?n=${count}&part=${part}`)
+  officeFetch(`/api/voice/standup?n=${count}&part=${part}`)
     .then((r) => (r.ok ? r.blob() : Promise.reject(new Error(`HTTP ${r.status}`))))
     .then((b) => playClip(b))
     .then((ok) => done(ok ? 'elevenlabs' : 'elevenlabs failed'))

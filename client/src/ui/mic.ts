@@ -5,6 +5,7 @@
 // while one of those shows its pulsing 🎙; while it is, the jukebox and the CEO's voice dip and cues wait (sfx.ts).
 // The rules are pure (micSilence.ts, handsFree.ts, micKeys.ts, micText.ts); window.__swarmMic is the probe.
 import { create } from 'zustand';
+import { officeFetch } from '../transport';
 import { CLIP_MAX_BYTES, clipProblem } from '../../../shared/clipLimits';
 import type { ListenProvider } from '../../../shared/types';
 import { api } from '../api';
@@ -454,7 +455,7 @@ async function transcribe(s: Session, clip: Blob, ms: number) {
   s.release?.(); // the mic is off: sounds come back while the text is on its way
   s.release = null;
   try {
-    const res = await fetch('/api/voice/transcribe', { method: 'POST', headers: { 'Content-Type': clip.type, 'X-Clip-Ms': String(Math.round(ms)) }, body: clip });
+    const res = await officeFetch('/api/voice/transcribe', { method: 'POST', headers: { 'Content-Type': clip.type, 'X-Clip-Ms': String(Math.round(ms)) }, body: clip });
     const data = (await res.json().catch(() => ({}))) as { text?: unknown; error?: unknown };
     if (!res.ok) throw new Error(typeof data.error === 'string' ? data.error : `HTTP ${res.status}`);
     if (session !== s) return; // stopped meanwhile

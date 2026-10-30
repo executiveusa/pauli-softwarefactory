@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { setOfficeImage } from '../transport';
 import * as THREE from 'three';
 import type { RepoView } from '../../../shared/types';
 import { qaKey, useStore, type Agent } from '../store';
@@ -90,7 +91,7 @@ export function AppMonitor({ repo, agents }: { repo: RepoView; agents: Agent[] }
       let alive = true;
       const img = new Image();
       img.onload = () => alive && setShot({ img, caption: `QA's screenshot of PR #${channel}` });
-      img.src = qaShot;
+      setOfficeImage(img, qaShot);
       return () => {
         alive = false;
         img.onload = null;

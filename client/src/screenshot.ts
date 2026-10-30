@@ -1,3 +1,4 @@
+import { setOfficeImage } from './transport';
 // Loading an agent's latest browser screenshot. A new task can clear it between the announce and the fetch (the
 // server then answers 204), so a failed load is ignored and whoever asked keeps the image it already had.
 
@@ -13,7 +14,7 @@ export function loadScreenshot(agentId: string, at: number | null | undefined, o
   const img = new Image();
   img.onload = () => alive && onLoad(img);
   img.onerror = () => {};
-  img.src = screenshotUrl(agentId, at);
+  setOfficeImage(img, screenshotUrl(agentId, at));
   return () => {
     alive = false;
     img.onload = null;

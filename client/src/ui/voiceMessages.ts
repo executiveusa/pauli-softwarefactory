@@ -5,6 +5,7 @@
 // A CEO message that ends by itself, with nothing else to read, may open the hands-free phone's mic (mic.ts).
 // With captions on, what's said is written out as it's read (captions.ts), in step with the clip or the browser's voice.
 import { speechText } from '../../../shared/speech';
+import { officeFetch } from '../transport';
 import type { PhoneMessage, VoiceProvider } from '../../../shared/types';
 import { useStore } from '../store';
 import { sliderGain } from './audioPrefs';
@@ -159,7 +160,7 @@ async function playClip(id: number, began: (clipMs: number, parts: number) => vo
     end?.();
   };
   for (let part = 0, parts = 1; part < parts; part++) {
-    const res = await fetch(cached ? `/api/voice/messages/${id}?cached=1&part=${part}` : `/api/voice/messages/${id}`);
+    const res = await officeFetch(cached ? `/api/voice/messages/${id}?cached=1&part=${part}` : `/api/voice/messages/${id}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     parts = Math.max(1, Number(res.headers.get('X-Voice-Parts')) || 1);
     const data = await res.arrayBuffer();

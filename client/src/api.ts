@@ -1,4 +1,5 @@
 import { useStore } from './store';
+import { officeFetch } from './transport';
 import type { PongResult } from '../../shared/pong';
 import type { AgentStyle } from '../../shared/looks';
 import type { AgentCli, AgentPromptView, AgentView, CloudView, DoctorFinding, DoctorFix, EffortLevel, GhRepoSummary, NotifyChannel, NotifyChannelsView, NotifyWebhook, OfficeUpdateView, PreviewView, ProjectFolderView, PrPreviewView, RepoView, SwarmSettings, UsageView, VoiceCacheView, VoiceOption, MachineHost } from '../../shared/types';
@@ -11,7 +12,7 @@ async function call<T = unknown>(method: string, url: string, body?: unknown, to
     useStore.getState().pushToast('info', '▶ Replaying: live actions are off. Press Esc to go back to the live office.');
     throw new Error('The time-lapse is playing');
   }
-  const res = await fetch(url, {
+  const res = await officeFetch(url, {
     method,
     headers: body !== undefined ? { 'Content-Type': 'application/json' } : undefined,
     body: body !== undefined ? JSON.stringify(body) : undefined,
@@ -27,7 +28,7 @@ async function call<T = unknown>(method: string, url: string, body?: unknown, to
 
 /** An audio clip from the office (the voice settings' Test line); errors become toasts like the rest. */
 async function clip(url: string): Promise<Blob> {
-  const res = await fetch(url);
+  const res = await officeFetch(url);
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
     const message = (data as { error?: string }).error ?? `${res.status} ${res.statusText}`;

@@ -1,4 +1,5 @@
 import { useStore } from './store';
+import { wsUrl, wsProtocols } from './transport';
 import { restartExpected, shouldReload } from './officeUpdate';
 import type { ClientEvent, ServerEvent } from '../../shared/types';
 import { currentWatch } from './watch';
@@ -71,8 +72,7 @@ export function connect() {
     watching = true;
     useStore.subscribe(sendWatch);
   }
-  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-  const ws = new WebSocket(`${proto}://${location.host}/ws`);
+  const ws = new WebSocket(wsUrl('/ws'), wsProtocols());
   socket = ws;
   ws.onopen = () => {
     retry = 0;
